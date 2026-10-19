@@ -1,0 +1,17 @@
+#!/bin/sh
+# Enforce Conventional Commits on the subject line.
+TYPES="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert"
+PATTERN="^($TYPES)(\([^)]+\))?!?: .+"
+SUBJECT=$(head -n 1 "$1")
+
+case "$SUBJECT" in
+    Merge\ *|Revert\ *|fixup!\ *|squash!\ *) exit 0 ;;
+esac
+
+if ! printf '%s\n' "$SUBJECT" | grep -Eq "$PATTERN"; then
+    echo "error: commit subject does not follow Conventional Commits" >&2
+    echo "expected: <type>[optional scope]: <description>" >&2
+    echo "types: $(echo "$TYPES" | tr '|' ' ')" >&2
+    echo "got: $SUBJECT" >&2
+    exit 1
+fi
